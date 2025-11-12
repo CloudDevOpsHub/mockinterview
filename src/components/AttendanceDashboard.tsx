@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Calendar, Users, UserCheck, TrendingUp, Download, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Users, UserCheck, UserX, TrendingUp, Download, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface AttendanceSession {
