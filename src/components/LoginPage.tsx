@@ -95,15 +95,15 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-blue-900 dark:text-blue-100 font-medium mb-2">
-              Pre-configured Admin Accounts:
-            </p>
-            <p className="text-xs text-blue-700 dark:text-blue-300">
-              admin1@example.com - admin10@example.com
-            </p>
-            <p className="text-xs text-blue-700 dark:text-blue-300">
-              Password: Admin@123
+          <div className="mt-6 text-center">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Don't have an account?{' '}
+              <a
+                href="/signup"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+              >
+                Sign Up
+              </a>
             </p>
           </div>
         </div>
