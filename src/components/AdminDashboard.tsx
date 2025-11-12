@@ -119,7 +119,14 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
   };
 
   const handleSaveRound = async (roundData: Omit<InterviewRound, 'id' | 'leaderboard_id' | 'created_at' | 'updated_at'>) => {
-    if (!selectedLeaderboard) return;
+    if (!selectedLeaderboard || !admin) return;
+
+    // Debug: Check current user and leaderboard ownership
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('Current auth user:', user?.id);
+    console.log('Admin ID:', admin.id);
+    console.log('Leaderboard created_by:', selectedLeaderboard.created_by);
+    console.log('Match:', user?.id === selectedLeaderboard.created_by);
 
     const { data, error } = await supabase
       .from('interview_rounds')
@@ -132,7 +139,7 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
 
     if (error) {
       console.error('Error saving interview round:', error);
-      alert(`Failed to save interview round: ${error.message}`);
+      alert(`Failed to save interview round: ${error.message}\n\nDebug Info:\nYour ID: ${user?.id}\nLeaderboard Owner: ${selectedLeaderboard.created_by}\nMatch: ${user?.id === selectedLeaderboard.created_by}`);
       return;
     }
 
