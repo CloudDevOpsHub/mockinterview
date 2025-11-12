@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { LogOut, Trophy, Activity, Moon, Sun, UserCheck } from 'lucide-react';
+import { LogOut, Trophy, Activity, Moon, Sun, UserCheck, Users } from 'lucide-react';
 import { AdminDashboard } from './AdminDashboard';
 import { ActivenessBoardSelector } from './ActivenessBoardSelector';
 import { AttendanceSessionManager } from './AttendanceSessionManager';
 import { AttendanceDashboard } from './AttendanceDashboard';
+import { BatchManagement } from './BatchManagement';
 
-type DashboardType = 'interviews' | 'activeness' | 'attendance';
+type DashboardType = 'interviews' | 'activeness' | 'attendance' | 'batches';
 
 export function AdminPanel() {
   const { admin, signOut } = useAuth();
@@ -49,7 +50,7 @@ export function AdminPanel() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setActiveTab('interviews')}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
@@ -59,7 +60,7 @@ export function AdminPanel() {
               }`}
             >
               <Trophy className="w-5 h-5" />
-              Interview Leaderboard
+              Interviews
             </button>
             <button
               onClick={() => setActiveTab('activeness')}
@@ -70,7 +71,18 @@ export function AdminPanel() {
               }`}
             >
               <Activity className="w-5 h-5" />
-              Zoom Activeness Board
+              Activeness
+            </button>
+            <button
+              onClick={() => setActiveTab('batches')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                activeTab === 'batches'
+                  ? 'bg-orange-600 text-white shadow-lg'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              Batches
             </button>
             <button
               onClick={() => setActiveTab('attendance')}
@@ -81,7 +93,7 @@ export function AdminPanel() {
               }`}
             >
               <UserCheck className="w-5 h-5" />
-              Attendance Tracker
+              Attendance
             </button>
           </div>
         </div>
@@ -92,6 +104,8 @@ export function AdminPanel() {
           <AdminDashboard hideHeader={true} />
         ) : activeTab === 'activeness' ? (
           <ActivenessBoardSelector />
+        ) : activeTab === 'batches' ? (
+          <BatchManagement />
         ) : (
           <div className="space-y-8">
             <AttendanceSessionManager />
