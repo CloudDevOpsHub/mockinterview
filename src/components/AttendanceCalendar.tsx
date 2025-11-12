@@ -8,6 +8,7 @@ interface DayAttendance {
   percentage: number;
   sessionId: string;
   sessionName: string;
+  batchName: string;
   publicId: string;
 }
 
@@ -36,7 +37,7 @@ export function AttendanceCalendar({ onDateSelect, selectedDate }: AttendanceCal
 
       const { data: sessions, error: sessionsError } = await supabase
         .from('attendance_sessions')
-        .select('id, session_date, session_name, public_id')
+        .select('id, session_date, session_name, batch_name, public_id')
         .gte('session_date', startDate)
         .lte('session_date', endDate);
 
@@ -59,6 +60,7 @@ export function AttendanceCalendar({ onDateSelect, selectedDate }: AttendanceCal
           percentage: count > 0 ? 100 : 0,
           sessionId: session.id,
           sessionName: session.session_name,
+          batchName: session.batch_name || 'Default Batch',
           publicId: session.public_id
         };
       }
@@ -175,12 +177,15 @@ export function AttendanceCalendar({ onDateSelect, selectedDate }: AttendanceCal
                 } ${attendance ? 'cursor-pointer' : 'cursor-default opacity-40'}`}
               >
                 <div className="flex flex-col items-center justify-center h-full p-1 relative group">
-                  <span className={`text-sm font-medium ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}>
+                  <span className={`text-xs font-medium ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}>
                     {day}
                   </span>
                   {attendance && (
                     <>
-                      <span className="text-lg font-bold text-gray-900 mt-1">{attendance.count}</span>
+                      <span className="text-2xl font-bold text-gray-900 mt-0.5">{attendance.count}</span>
+                      <span className="text-xs text-gray-500 truncate w-full text-center px-0.5" title={attendance.batchName}>
+                        {attendance.batchName}
+                      </span>
                       <div
                         className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full ${getAttendanceColor(
                           attendance.percentage
@@ -241,7 +246,7 @@ export function AttendanceCalendar({ onDateSelect, selectedDate }: AttendanceCal
             </div>
           </div>
           <div className="text-xs text-gray-500">
-            Hover over dates to share public URL
+            Numbers show present count • Hover to share URL
           </div>
         </div>
       </div>

@@ -3,11 +3,18 @@ import { Users, UserCheck, TrendingUp, Download, RefreshCw, Filter, Copy, Extern
 import { supabase } from '../lib/supabase';
 import { AttendanceCalendar } from './AttendanceCalendar';
 
+interface Batch {
+  id: string;
+  name: string;
+}
+
 interface AttendanceSession {
   id: string;
   session_date: string;
   session_code: string;
   session_name: string;
+  batch_name: string;
+  batch_id: string | null;
   public_id: string;
   is_active: boolean;
 }
@@ -22,6 +29,7 @@ interface AttendanceRecord {
 interface DailyStats {
   date: string;
   sessionName: string;
+  batchName: string;
   total_present: number;
   attendance_percentage: number;
   records: AttendanceRecord[];
@@ -29,6 +37,8 @@ interface DailyStats {
 
 export function AttendanceDashboard() {
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState<string>('all');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [stats, setStats] = useState<DailyStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +47,13 @@ export function AttendanceDashboard() {
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   useEffect(() => {
+    loadBatches();
     loadSessions();
   }, []);
+
+  useEffect(() => {
+    loadSessions();
+  }, [selectedBatchId]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -58,12 +73,33 @@ export function AttendanceDashboard() {
     };
   }, [autoRefresh, selectedDate]);
 
-  const loadSessions = async () => {
+  const loadBatches = async () => {
     try {
       const { data, error } = await supabase
+        .from('batches')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setBatches(data || []);
+    } catch (error) {
+      console.error('Error loading batches:', error);
+    }
+  };
+
+  const loadSessions = async () => {
+    try {
+      let query = supabase
         .from('attendance_sessions')
         .select('*')
         .order('session_date', { ascending: false });
+
+      if (selectedBatchId && selectedBatchId !== 'all') {
+        query = query.eq('batch_id', selectedBatchId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setSessions(data || []);
@@ -103,6 +139,7 @@ export function AttendanceDashboard() {
       setStats({
         date: selectedDate,
         sessionName: session.session_name,
+        batchName: session.batch_name || 'Default Batch',
         total_present: totalPresent,
         attendance_percentage: attendancePercentage,
         records: records || []
@@ -188,9 +225,28 @@ export function AttendanceDashboard() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Daily Attendance Dashboard</h3>
-            <p className="text-sm text-gray-600 mt-1">View and manage attendance records</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Daily Attendance Dashboard</h3>
+              <p className="text-sm text-gray-600 mt-1">View and manage attendance records</p>
+            </div>
+            {batches.length > 0 && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Filter by Batch</label>
+                <select
+                  value={selectedBatchId}
+                  onChange={(e) => setSelectedBatchId(e.target.value)}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Batches</option>
+                  {batches.map((batch) => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <div className="flex gap-3">
             {currentSession && currentSession.public_id && (
@@ -270,6 +326,7 @@ export function AttendanceDashboard() {
                       {stats.sessionName}
                     </p>
                     <p className="text-xs text-purple-700 mt-0.5">{formatDate(stats.date)}</p>
+                    <p className="text-xs text-purple-600 mt-0.5">Batch: {stats.batchName}</p>
                   </div>
                   <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
                     <Users className="w-6 h-6 text-purple-700" />

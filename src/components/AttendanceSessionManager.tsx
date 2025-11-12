@@ -3,12 +3,20 @@ import { Calendar, Copy, Plus, RefreshCw, ExternalLink, CheckCircle, XCircle, Cl
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
+interface Batch {
+  id: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+}
+
 interface AttendanceSession {
   id: string;
   session_date: string;
   session_code: string;
   session_name: string;
   batch_name: string;
+  batch_id: string | null;
   is_active: boolean;
   expires_at: string;
   created_at: string;
@@ -17,16 +25,18 @@ interface AttendanceSession {
 export function AttendanceSessionManager() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showBatchForm, setShowBatchForm] = useState(false);
-  const [batchName, setBatchName] = useState('');
+  const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
     loadSessions();
+    loadBatches();
   }, []);
 
   const loadSessions = async () => {
@@ -46,9 +56,28 @@ export function AttendanceSessionManager() {
     }
   };
 
+  const loadBatches = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('batches')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setBatches(data || []);
+
+      if (data && data.length > 0 && !selectedBatchId) {
+        setSelectedBatchId(data[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading batches:', error);
+    }
+  };
+
   const createTodaySession = async () => {
-    if (showBatchForm && !batchName.trim()) {
-      setMessage({ type: 'error', text: 'Please enter a batch name' });
+    if (!selectedBatchId) {
+      setMessage({ type: 'error', text: 'Please select a batch' });
       return;
     }
 
@@ -56,12 +85,18 @@ export function AttendanceSessionManager() {
     setMessage(null);
 
     try {
+      const selectedBatch = batches.find(b => b.id === selectedBatchId);
+      if (!selectedBatch) {
+        setMessage({ type: 'error', text: 'Selected batch not found' });
+        return;
+      }
+
       const today = new Date().toISOString().split('T')[0];
-      const sessionCode = `attend-${today}`;
+      const sessionCode = `attend-${selectedBatchId.substring(0, 8)}-${today}`;
       const expiresAt = new Date();
       expiresAt.setHours(23, 59, 59, 999);
 
-      const sessionName = `Attendance - ${new Date().toLocaleDateString('en-US', {
+      const sessionName = `${selectedBatch.name} - ${new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
@@ -73,7 +108,8 @@ export function AttendanceSessionManager() {
           session_date: today,
           session_code: sessionCode,
           session_name: sessionName,
-          batch_name: batchName.trim() || 'Default Batch',
+          batch_name: selectedBatch.name,
+          batch_id: selectedBatchId,
           is_active: true,
           expires_at: expiresAt.toISOString(),
           created_by: user?.id
@@ -81,14 +117,13 @@ export function AttendanceSessionManager() {
 
       if (error) {
         if (error.code === '23505') {
-          setMessage({ type: 'error', text: 'Attendance session for today already exists!' });
+          setMessage({ type: 'error', text: 'Attendance session for this batch today already exists!' });
         } else {
           throw error;
         }
       } else {
         setMessage({ type: 'success', text: 'Attendance session created successfully!' });
         setShowBatchForm(false);
-        setBatchName('');
         await loadSessions();
       }
     } catch (error) {
@@ -222,25 +257,35 @@ export function AttendanceSessionManager() {
 
         {showBatchForm && !todaySession && (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Batch Information</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Select Batch for Attendance</h4>
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Batch Name
+                  Batch
                 </label>
-                <input
-                  type="text"
-                  value={batchName}
-                  onChange={(e) => setBatchName(e.target.value)}
-                  placeholder="e.g., Batch A, Morning Batch, AWS Module 5"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">This helps organize attendance by class/batch</p>
+                {batches.length === 0 ? (
+                  <div className="text-sm text-gray-500 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    No active batches available. Please create a batch first in the Batches tab.
+                  </div>
+                ) : (
+                  <select
+                    value={selectedBatchId}
+                    onChange={(e) => setSelectedBatchId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {batches.map((batch) => (
+                      <option key={batch.id} value={batch.id}>
+                        {batch.name} {batch.description && `- ${batch.description}`}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <p className="text-xs text-gray-500 mt-1">Select which batch this attendance session is for</p>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={createTodaySession}
-                  disabled={creating}
+                  disabled={creating || batches.length === 0}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
                 >
                   {creating ? 'Creating...' : 'Create Session'}
@@ -248,7 +293,6 @@ export function AttendanceSessionManager() {
                 <button
                   onClick={() => {
                     setShowBatchForm(false);
-                    setBatchName('');
                   }}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                 >

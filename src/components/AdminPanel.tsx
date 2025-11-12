@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { LogOut, Trophy, Activity, Moon, Sun, UserCheck, Users } from 'lucide-react';
+import { LogOut, Trophy, Activity, Moon, Sun, UserCheck, Users, BarChart3 } from 'lucide-react';
 import { AdminDashboard } from './AdminDashboard';
 import { ActivenessBoardSelector } from './ActivenessBoardSelector';
 import { AttendanceSessionManager } from './AttendanceSessionManager';
 import { AttendanceDashboard } from './AttendanceDashboard';
 import { BatchManagement } from './BatchManagement';
+import { BatchAttendanceStats } from './BatchAttendanceStats';
 
-type DashboardType = 'interviews' | 'activeness' | 'attendance' | 'batches';
+type DashboardType = 'interviews' | 'activeness' | 'attendance' | 'batches' | 'batchstats';
 
 export function AdminPanel() {
   const { admin, signOut } = useAuth();
@@ -95,6 +96,17 @@ export function AdminPanel() {
               <UserCheck className="w-5 h-5" />
               Attendance
             </button>
+            <button
+              onClick={() => setActiveTab('batchstats')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                activeTab === 'batchstats'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              <BarChart3 className="w-5 h-5" />
+              Batch Stats
+            </button>
           </div>
         </div>
       </header>
@@ -106,6 +118,8 @@ export function AdminPanel() {
           <ActivenessBoardSelector />
         ) : activeTab === 'batches' ? (
           <BatchManagement />
+        ) : activeTab === 'batchstats' ? (
+          <BatchAttendanceStats />
         ) : (
           <div className="space-y-8">
             <AttendanceSessionManager />
