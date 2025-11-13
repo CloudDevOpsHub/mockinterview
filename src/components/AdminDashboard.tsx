@@ -121,7 +121,7 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
   const handleSaveRound = async (roundData: Omit<InterviewRound, 'id' | 'leaderboard_id' | 'created_at' | 'updated_at'>) => {
     if (!selectedLeaderboard) return;
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('interview_rounds')
       .insert({
         ...roundData,
@@ -129,6 +129,12 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
       })
       .select()
       .single();
+
+    if (error) {
+      console.error('Error saving interview round:', error);
+      alert(`Failed to save interview round: ${error.message}`);
+      return;
+    }
 
     if (data) {
       setRounds([...rounds, data]);
