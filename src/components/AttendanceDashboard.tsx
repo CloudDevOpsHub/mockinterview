@@ -33,7 +33,7 @@ interface AttendanceDashboardProps {
 }
 
 export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: AttendanceDashboardProps) {
-  const { user } = useAuth();
+  const { user, admin } = useAuth();
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<AttendanceSession | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -268,13 +268,15 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
             Manage daily attendance sessions and track student participation
           </p>
         </div>
-        <button
-          onClick={createNewSession}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-        >
-          <Calendar className="w-5 h-5" />
-          Create New Session
-        </button>
+        {(admin?.role === 'admin' || admin?.role === 'editor') && (
+          <button
+            onClick={createNewSession}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <Calendar className="w-5 h-5" />
+            Create New Session
+          </button>
+        )}
       </div>
 
       <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800 p-6">
@@ -395,26 +397,30 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
                           </p>
                         </div>
                         <div className="flex gap-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              startEditingSession(session);
-                            }}
-                            className="p-1 text-slate-400 hover:text-blue-600"
-                            title="Edit session name"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              confirmDeleteSession(session);
-                            }}
-                            className="p-1 text-slate-400 hover:text-red-600"
-                            title="Delete session"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {(admin?.role === 'admin' || admin?.role === 'editor') && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditingSession(session);
+                              }}
+                              className="p-1 text-slate-400 hover:text-blue-600"
+                              title="Edit session name"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          {admin?.role === 'admin' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDeleteSession(session);
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-600"
+                              title="Delete session"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </>
                     )}
