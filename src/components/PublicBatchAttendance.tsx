@@ -73,7 +73,7 @@ export function PublicBatchAttendance() {
     const { data: sessionsData } = await supabase
       .from('attendance_sessions')
       .select('id, session_name, session_date, created_at')
-      .eq('batch_id', urlData.batch_id)
+      .eq('batch_name', batchData.name)
       .order('session_date', { ascending: false });
 
     if (sessionsData) {

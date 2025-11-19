@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Calendar, Users, CheckCircle, XCircle, Clock, Edit2, Save, X, Copy, ExternalLink, Share2 } from 'lucide-react';
+import { Calendar, Users, CheckCircle, XCircle, Clock, Edit2, Save, X, Copy, ExternalLink, Share2, Trash2 } from 'lucide-react';
 import { AttendanceCalendar } from './AttendanceCalendar';
 import { AttendanceAnalytics } from './AttendanceAnalytics';
 import { useAuth } from '../contexts/AuthContext';
+import { ConfirmDialog } from './ConfirmDialog';
+import { Notification } from './Notification';
 
 interface AttendanceSession {
   id: string;
@@ -41,6 +43,9 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [publicUrl, setPublicUrl] = useState<string>('');
   const [loadingPublicUrl, setLoadingPublicUrl] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<AttendanceSession | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
 
   useEffect(() => {
     loadSessions();
@@ -109,6 +114,7 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
     if (data) {
       setSessions([data, ...sessions]);
       setSelectedSession(data);
+      setNotification({ type: 'success', message: 'Session created successfully!' });
     }
   };
 
@@ -209,6 +215,38 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
     if (session) {
       setSelectedSession(session);
     }
+  };
+
+  const confirmDeleteSession = (session: AttendanceSession) => {
+    setSessionToDelete(session);
+    setShowDeleteConfirm(true);
+  };
+
+  const deleteSession = async () => {
+    if (!sessionToDelete) return;
+
+    const { error } = await supabase
+      .from('attendance_sessions')
+      .delete()
+      .eq('id', sessionToDelete.id);
+
+    if (error) {
+      setNotification({ type: 'error', message: `Failed to delete session: ${error.message}` });
+      setShowDeleteConfirm(false);
+      setSessionToDelete(null);
+      return;
+    }
+
+    const updatedSessions = sessions.filter(s => s.id !== sessionToDelete.id);
+    setSessions(updatedSessions);
+
+    if (selectedSession?.id === sessionToDelete.id) {
+      setSelectedSession(updatedSessions.length > 0 ? updatedSessions[0] : null);
+    }
+
+    setNotification({ type: 'success', message: 'Session deleted successfully!' });
+    setShowDeleteConfirm(false);
+    setSessionToDelete(null);
   };
 
   const isExpired = (expiresAt: string) => {
@@ -356,15 +394,28 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
                             {new Date(session.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </p>
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startEditingSession(session);
-                          }}
-                          className="p-1 text-slate-400 hover:text-blue-600"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditingSession(session);
+                            }}
+                            className="p-1 text-slate-400 hover:text-blue-600"
+                            title="Edit session name"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDeleteSession(session);
+                            }}
+                            className="p-1 text-slate-400 hover:text-red-600"
+                            title="Delete session"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -485,6 +536,28 @@ export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: Atten
         onDateSelect={handleDateSelect}
         selectedDate={selectedDate}
       />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Session"
+        message={`Are you sure you want to delete "${sessionToDelete?.session_name}"? This will permanently remove all attendance records for this session.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={deleteSession}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setSessionToDelete(null);
+        }}
+        isDanger
+      />
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }

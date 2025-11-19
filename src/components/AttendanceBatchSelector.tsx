@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { AttendanceDashboard } from './AttendanceDashboard';
-import { Calendar, Plus, X } from 'lucide-react';
+import { Calendar, Plus, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { ConfirmDialog } from './ConfirmDialog';
+import { Notification } from './Notification';
 
 interface Batch {
   id: string;
@@ -20,6 +22,9 @@ export function AttendanceBatchSelector() {
   const [newBatchName, setNewBatchName] = useState('');
   const [newBatchDescription, setNewBatchDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [batchToDelete, setBatchToDelete] = useState<Batch | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
 
   useEffect(() => {
     loadBatches();
@@ -73,7 +78,40 @@ export function AttendanceBatchSelector() {
       setShowAddModal(false);
       setNewBatchName('');
       setNewBatchDescription('');
+      setNotification({ type: 'success', message: 'Batch created successfully!' });
     }
+  };
+
+  const confirmDeleteBatch = (batch: Batch) => {
+    setBatchToDelete(batch);
+    setShowDeleteConfirm(true);
+  };
+
+  const deleteBatch = async () => {
+    if (!batchToDelete) return;
+
+    const { error } = await supabase
+      .from('batches')
+      .delete()
+      .eq('id', batchToDelete.id);
+
+    if (error) {
+      setNotification({ type: 'error', message: `Failed to delete batch: ${error.message}` });
+      setShowDeleteConfirm(false);
+      setBatchToDelete(null);
+      return;
+    }
+
+    const updatedBatches = batches.filter(b => b.id !== batchToDelete.id);
+    setBatches(updatedBatches);
+
+    if (selectedBatch?.id === batchToDelete.id) {
+      setSelectedBatch(updatedBatches.length > 0 ? updatedBatches[0] : null);
+    }
+
+    setNotification({ type: 'success', message: 'Batch deleted successfully!' });
+    setShowDeleteConfirm(false);
+    setBatchToDelete(null);
   };
 
   if (loading) {
@@ -128,7 +166,7 @@ export function AttendanceBatchSelector() {
               ))}
             </select>
           </div>
-          <div className="pt-6">
+          <div className="pt-6 flex gap-2">
             <button
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
@@ -136,6 +174,16 @@ export function AttendanceBatchSelector() {
               <Plus className="w-5 h-5" />
               Add Batch
             </button>
+            {selectedBatch && (
+              <button
+                onClick={() => confirmDeleteBatch(selectedBatch)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                title="Delete Batch"
+              >
+                <Trash2 className="w-5 h-5" />
+                Delete
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -145,6 +193,28 @@ export function AttendanceBatchSelector() {
           batchId={selectedBatch.id}
           batchName={selectedBatch.name}
           onBatchUpdate={loadBatches}
+        />
+      )}
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Batch"
+        message={`Are you sure you want to delete "${batchToDelete?.name}"? This action cannot be undone and will delete all associated data.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={deleteBatch}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setBatchToDelete(null);
+        }}
+        isDanger
+      />
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
         />
       )}
 
