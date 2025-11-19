@@ -4,6 +4,7 @@ import { ActivenessDashboard } from './ActivenessDashboard';
 import { ActivenessTable } from './ActivenessTable';
 import { StudentModulesModal } from './StudentModulesModal';
 import { ModuleScoreForm } from './ModuleScoreForm';
+import { useRole } from '../hooks/useRole';
 import { Plus, Share2, Download, Upload } from 'lucide-react';
 import { calculateBatchActivenessMetrics, getStudentActivenessArray } from '../lib/activeness';
 import type { Database } from '../lib/database.types';
@@ -17,6 +18,7 @@ interface ActivenessBoardManagerProps {
 }
 
 export function ActivenessBoardManager({ selectedBoard }: ActivenessBoardManagerProps) {
+  const { canCreate, canDelete } = useRole();
   const [scores, setScores] = useState<ModuleScore[]>([]);
   const [studentMetrics, setStudentMetrics] = useState<StudentActivenessMetrics[]>([]);
   const [batchMetrics, setBatchMetrics] = useState<BatchActivenessMetrics>({
@@ -182,16 +184,18 @@ export function ActivenessBoardManager({ selectedBoard }: ActivenessBoardManager
   return (
     <div>
       <div className="mb-6 flex flex-wrap gap-3">
-        <button
-          onClick={() => {
-            setEditingScore(null);
-            setShowScoreForm(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Record Module Score
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => {
+              setEditingScore(null);
+              setShowScoreForm(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Record Module Score
+          </button>
+        )}
         <button
           onClick={copyPublicLink}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -206,16 +210,18 @@ export function ActivenessBoardManager({ selectedBoard }: ActivenessBoardManager
           <Download className="w-5 h-5" />
           Export
         </button>
-        <label className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors cursor-pointer">
-          <Upload className="w-5 h-5" />
-          Import
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            className="hidden"
-          />
-        </label>
+        {canCreate && (
+          <label className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors cursor-pointer">
+            <Upload className="w-5 h-5" />
+            Import
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </label>
+        )}
       </div>
 
       <ActivenessDashboard metrics={batchMetrics} />

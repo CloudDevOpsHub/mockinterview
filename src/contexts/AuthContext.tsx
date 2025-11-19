@@ -6,6 +6,7 @@ interface Admin {
   id: string;
   email: string;
   name: string;
+  role: 'admin' | 'editor' | 'viewer';
   created_at: string;
 }
 

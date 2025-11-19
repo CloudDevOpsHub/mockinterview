@@ -8,6 +8,7 @@ import { InterviewRoundForm } from './InterviewRoundForm';
 import { LeaderboardSelector } from './LeaderboardSelector';
 import { LogOut, Plus, Download, Upload, Share2, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useRole } from '../hooks/useRole';
 import { calculateBatchMetrics, getStudentMetricsArray } from '../lib/scoring';
 import type { Database } from '../lib/database.types';
 import type { StudentMetrics, BatchMetrics } from '../lib/scoring';
@@ -22,6 +23,7 @@ interface AdminDashboardProps {
 export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
   const { admin, signOut } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { canCreate, canDelete, isViewer } = useRole();
   const [leaderboards, setLeaderboards] = useState<Leaderboard[]>([]);
   const [selectedLeaderboard, setSelectedLeaderboard] = useState<Leaderboard | null>(null);
   const [rounds, setRounds] = useState<InterviewRound[]>([]);
@@ -244,13 +246,15 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
         {selectedLeaderboard && (
           <>
             <div className="mb-6 flex flex-wrap gap-3">
-              <button
-                onClick={() => setShowRoundForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                Record Interview
-              </button>
+              {canCreate && (
+                <button
+                  onClick={() => setShowRoundForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                  Record Interview
+                </button>
+              )}
               <button
                 onClick={copyPublicLink}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
@@ -265,16 +269,18 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
                 <Download className="w-5 h-5" />
                 Export
               </button>
-              <label className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors cursor-pointer">
-                <Upload className="w-5 h-5" />
-                Import
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImport}
-                  className="hidden"
-                />
-              </label>
+              {canCreate && (
+                <label className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors cursor-pointer">
+                  <Upload className="w-5 h-5" />
+                  Import
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImport}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
             <AnalyticsDashboard metrics={batchMetrics} />
