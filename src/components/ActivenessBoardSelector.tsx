@@ -75,15 +75,13 @@ export function ActivenessBoardSelector() {
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             Select Activeness Board
           </h2>
-          {(admin?.role === 'admin' || admin?.role === 'editor') && (
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              New Board
-            </button>
-          )}
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            New Board
+          </button>
         </div>
 
         {showCreateForm && (
@@ -155,20 +153,18 @@ export function ActivenessBoardSelector() {
             <p className="text-sm text-slate-600 dark:text-slate-400">
               {selectedBoard.description || 'No description'}
             </p>
-            {admin?.role === 'admin' && (
-              <button
-                onClick={() => handleDeleteBoard(selectedBoard.id)}
-                className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                title="Delete board"
-              >
-                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-              </button>
-            )}
+            <button
+              onClick={() => handleDeleteBoard(selectedBoard.id)}
+              className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+              title="Delete board"
+            >
+              <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+            </button>
           </div>
         )}
       </div>
 
-      <ActivenessBoardManager selectedBoard={selectedBoard} userRole={admin?.role} />
+      <ActivenessBoardManager selectedBoard={selectedBoard} />
     </div>
   );
 }

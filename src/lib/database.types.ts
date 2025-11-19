@@ -6,24 +6,18 @@ export interface Database {
           id: string;
           email: string;
           name: string;
-          role: 'admin' | 'editor' | 'viewer';
-          created_by: string | null;
           created_at: string;
         };
         Insert: {
           id: string;
           email: string;
           name: string;
-          role?: 'admin' | 'editor' | 'viewer';
-          created_by?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           email?: string;
           name?: string;
-          role?: 'admin' | 'editor' | 'viewer';
-          created_by?: string | null;
           created_at?: string;
         };
       };

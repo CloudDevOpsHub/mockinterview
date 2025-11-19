@@ -14,7 +14,7 @@ interface Batch {
 }
 
 export function AttendanceBatchSelector() {
-  const { user, admin } = useAuth();
+  const { user } = useAuth();
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
   const [loading, setLoading] = useState(true);
@@ -167,16 +167,14 @@ export function AttendanceBatchSelector() {
             </select>
           </div>
           <div className="pt-6 flex gap-2">
-            {(admin?.role === 'admin' || admin?.role === 'editor') && (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Add Batch
-              </button>
-            )}
-            {selectedBatch && admin?.role === 'admin' && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Batch
+            </button>
+            {selectedBatch && (
               <button
                 onClick={() => confirmDeleteBatch(selectedBatch)}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
