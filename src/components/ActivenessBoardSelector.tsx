@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useRole } from '../hooks/useRole';
 import { supabase } from '../lib/supabase';
 import { ActivenessBoardManager } from './ActivenessBoardManager';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
@@ -10,7 +9,6 @@ type ActivenessBoard = Database['public']['Tables']['activeness_boards']['Row'];
 
 export function ActivenessBoardSelector() {
   const { admin } = useAuth();
-  const { canCreate, canDelete } = useRole();
   const [boards, setBoards] = useState<ActivenessBoard[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<ActivenessBoard | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);

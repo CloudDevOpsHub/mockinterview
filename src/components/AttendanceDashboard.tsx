@@ -4,7 +4,6 @@ import { Calendar, Users, CheckCircle, XCircle, Clock, Edit2, Save, X, Copy, Ext
 import { AttendanceCalendar } from './AttendanceCalendar';
 import { AttendanceAnalytics } from './AttendanceAnalytics';
 import { useAuth } from '../contexts/AuthContext';
-import { useRole } from '../hooks/useRole';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Notification } from './Notification';
 
@@ -35,7 +34,6 @@ interface AttendanceDashboardProps {
 
 export function AttendanceDashboard({ batchId, batchName, onBatchUpdate }: AttendanceDashboardProps) {
   const { user } = useAuth();
-  const { canCreate, canEdit, canDelete } = useRole();
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<AttendanceSession | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
