@@ -1,5 +1,4 @@
 import { X, TrendingUp, Trash2 } from 'lucide-react';
-import { useRole } from '../hooks/useRole';
 import type { Database } from '../lib/database.types';
 import type { StudentMetrics } from '../lib/scoring';
 
@@ -20,8 +19,6 @@ export function StudentRoundsModal({
   onDeleteRound,
   isPublic = false,
 }: StudentRoundsModalProps) {
-  const { canDelete } = useRole();
-
   const getScoreColor = (score: number) => {
     if (score >= 9) return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20';
     if (score >= 7) return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20';
@@ -115,7 +112,7 @@ export function StudentRoundsModal({
                           </p>
                         </div>
 
-                        {!isPublic && onDeleteRound && canDelete && (
+                        {!isPublic && onDeleteRound && (
                           <button
                             onClick={() => {
                               if (confirm('Delete this interview round?')) {

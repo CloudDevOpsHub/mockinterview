@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Plus, Trash2, LayoutList } from 'lucide-react';
-import { useRole } from '../hooks/useRole';
 import type { Database } from '../lib/database.types';
 
 type Leaderboard = Database['public']['Tables']['leaderboards']['Row'];
@@ -20,7 +19,6 @@ export function LeaderboardSelector({
   onCreate,
   onDelete,
 }: LeaderboardSelectorProps) {
-  const { canCreate, canDelete } = useRole();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -43,15 +41,13 @@ export function LeaderboardSelector({
             Leaderboards
           </h2>
         </div>
-        {canCreate && (
-          <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Board
-          </button>
-        )}
+        <button
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          New Board
+        </button>
       </div>
 
       {showCreateForm && (
@@ -112,14 +108,12 @@ export function LeaderboardSelector({
               >
                 {board.name}
               </button>
-              {canDelete && (
-                <button
-                  onClick={() => onDelete(board.id)}
-                  className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                </button>
-              )}
+              <button
+                onClick={() => onDelete(board.id)}
+                className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </button>
             </div>
           ))}
         </div>

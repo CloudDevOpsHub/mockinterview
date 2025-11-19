@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { LogOut, Trophy, Activity, Moon, Sun, Calendar, Users } from 'lucide-react';
+import { LogOut, Trophy, Activity, Moon, Sun, Calendar } from 'lucide-react';
 import { AdminDashboard } from './AdminDashboard';
 import { ActivenessBoardSelector } from './ActivenessBoardSelector';
 import { AttendanceBatchSelector } from './AttendanceBatchSelector';
-import { UserManagement } from './UserManagement';
 
-type DashboardType = 'interviews' | 'activeness' | 'attendance' | 'users';
+type DashboardType = 'interviews' | 'activeness' | 'attendance';
 
 export function AdminPanel() {
   const { admin, signOut } = useAuth();
@@ -24,7 +23,7 @@ export function AdminPanel() {
                 Admin Dashboard
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Welcome, {admin?.name} ({admin?.role})
+                Welcome, {admin?.name}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -49,7 +48,7 @@ export function AdminPanel() {
             </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('interviews')}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
@@ -83,19 +82,6 @@ export function AdminPanel() {
               <Calendar className="w-5 h-5" />
               Attendance Tracker
             </button>
-            {admin?.role === 'admin' && (
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                  activeTab === 'users'
-                    ? 'bg-purple-600 text-white shadow-lg'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                User Management
-              </button>
-            )}
           </div>
         </div>
       </header>
@@ -105,11 +91,9 @@ export function AdminPanel() {
           <AdminDashboard hideHeader={true} />
         ) : activeTab === 'activeness' ? (
           <ActivenessBoardSelector />
-        ) : activeTab === 'attendance' ? (
+        ) : (
           <AttendanceBatchSelector />
-        ) : activeTab === 'users' ? (
-          <UserManagement />
-        ) : null}
+        )}
       </main>
     </div>
   );
