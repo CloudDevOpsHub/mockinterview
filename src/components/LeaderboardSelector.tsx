@@ -10,7 +10,6 @@ interface LeaderboardSelectorProps {
   onSelect: (leaderboard: Leaderboard) => void;
   onCreate: (name: string, description: string) => void;
   onDelete: (id: string) => void;
-  userRole?: 'admin' | 'editor' | 'viewer';
 }
 
 export function LeaderboardSelector({
@@ -19,7 +18,6 @@ export function LeaderboardSelector({
   onSelect,
   onCreate,
   onDelete,
-  userRole,
 }: LeaderboardSelectorProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [name, setName] = useState('');
@@ -43,15 +41,13 @@ export function LeaderboardSelector({
             Leaderboards
           </h2>
         </div>
-        {(userRole === 'admin' || userRole === 'editor') && (
-          <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Board
-          </button>
-        )}
+        <button
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          New Board
+        </button>
       </div>
 
       {showCreateForm && (
@@ -112,14 +108,12 @@ export function LeaderboardSelector({
               >
                 {board.name}
               </button>
-              {userRole === 'admin' && (
-                <button
-                  onClick={() => onDelete(board.id)}
-                  className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                </button>
-              )}
+              <button
+                onClick={() => onDelete(board.id)}
+                className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </button>
             </div>
           ))}
         </div>

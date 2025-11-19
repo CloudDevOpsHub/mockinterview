@@ -238,22 +238,19 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
             onSelect={setSelectedLeaderboard}
             onCreate={handleCreateLeaderboard}
             onDelete={handleDeleteLeaderboard}
-            userRole={admin?.role}
           />
         </div>
 
         {selectedLeaderboard && (
           <>
             <div className="mb-6 flex flex-wrap gap-3">
-              {(admin?.role === 'admin' || admin?.role === 'editor') && (
-                <button
-                  onClick={() => setShowRoundForm(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                  Record Interview
-                </button>
-              )}
+              <button
+                onClick={() => setShowRoundForm(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                Record Interview
+              </button>
               <button
                 onClick={copyPublicLink}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
@@ -289,7 +286,6 @@ export function AdminDashboard({ hideHeader = false }: AdminDashboardProps) {
               <LeaderboardTable
                 students={studentMetrics}
                 onStudentClick={setSelectedStudent}
-                userRole={admin?.role}
               />
             </div>
           </>
