@@ -6,11 +6,12 @@ interface LeaderboardTableProps {
   students: StudentMetrics[];
   onStudentClick?: (student: StudentMetrics) => void;
   isPublic?: boolean;
+  userRole?: 'admin' | 'editor' | 'viewer';
 }
 
 type SortField = 'name' | 'highestScore' | 'totalScore' | 'averageScore' | 'interviewsGiven' | 'lastInterviewDate';
 
-export function LeaderboardTable({ students, onStudentClick, isPublic = false }: LeaderboardTableProps) {
+export function LeaderboardTable({ students, onStudentClick, isPublic = false, userRole }: LeaderboardTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortField>('averageScore');
   const [sortDesc, setSortDesc] = useState(true);

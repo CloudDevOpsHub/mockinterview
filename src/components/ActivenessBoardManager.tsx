@@ -14,9 +14,10 @@ type ModuleScore = Database['public']['Tables']['module_scores']['Row'];
 
 interface ActivenessBoardManagerProps {
   selectedBoard: ActivenessBoard | null;
+  userRole?: 'admin' | 'editor' | 'viewer';
 }
 
-export function ActivenessBoardManager({ selectedBoard }: ActivenessBoardManagerProps) {
+export function ActivenessBoardManager({ selectedBoard, userRole }: ActivenessBoardManagerProps) {
   const [scores, setScores] = useState<ModuleScore[]>([]);
   const [studentMetrics, setStudentMetrics] = useState<StudentActivenessMetrics[]>([]);
   const [batchMetrics, setBatchMetrics] = useState<BatchActivenessMetrics>({
@@ -182,16 +183,18 @@ export function ActivenessBoardManager({ selectedBoard }: ActivenessBoardManager
   return (
     <div>
       <div className="mb-6 flex flex-wrap gap-3">
-        <button
-          onClick={() => {
-            setEditingScore(null);
-            setShowScoreForm(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Record Module Score
-        </button>
+        {(userRole === 'admin' || userRole === 'editor') && (
+          <button
+            onClick={() => {
+              setEditingScore(null);
+              setShowScoreForm(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Record Module Score
+          </button>
+        )}
         <button
           onClick={copyPublicLink}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
