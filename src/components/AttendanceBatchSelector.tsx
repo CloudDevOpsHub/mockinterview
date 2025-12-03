@@ -30,6 +30,10 @@ export function AttendanceBatchSelector() {
     loadBatches();
   }, []);
 
+  useEffect(() => {
+    console.log('showAddModal state changed:', showAddModal);
+  }, [showAddModal]);
+
   const loadBatches = async () => {
     setLoading(true);
     const { data } = await supabase
@@ -47,12 +51,16 @@ export function AttendanceBatchSelector() {
   };
 
   const createBatch = async () => {
+    console.log('createBatch function called');
+    console.log('Batch name:', newBatchName);
+
     if (!newBatchName.trim()) {
       alert('Please enter a batch name');
       return;
     }
 
     setCreating(true);
+    console.log('Creating batch...');
 
     const { data, error } = await supabase
       .from('batches')
@@ -65,13 +73,16 @@ export function AttendanceBatchSelector() {
       .single();
 
     setCreating(false);
+    console.log('Create result:', { data, error });
 
     if (error) {
+      console.error('Batch creation error:', error);
       alert(`Failed to create batch: ${error.message}`);
       return;
     }
 
     if (data) {
+      console.log('Batch created successfully:', data);
       setBatches([data, ...batches]);
       setSelectedBatch(data);
       setShowAddModal(false);
@@ -132,8 +143,11 @@ export function AttendanceBatchSelector() {
           Create your first batch to start tracking attendance.
         </p>
         <button
-          onClick={() => setShowAddModal(true)}
-          className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+          onClick={() => {
+            console.log('Create Batch button clicked');
+            setShowAddModal(true);
+          }}
+          className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-5 h-5" />
           Create Batch
@@ -167,8 +181,11 @@ export function AttendanceBatchSelector() {
           </div>
           <div className="pt-6 flex gap-2">
             <button
-              onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              onClick={() => {
+                console.log('Add Batch button clicked');
+                setShowAddModal(true);
+              }}
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-5 h-5" />
               Add Batch
