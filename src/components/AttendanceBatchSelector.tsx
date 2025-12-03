@@ -59,7 +59,6 @@ export function AttendanceBatchSelector() {
       .insert({
         name: newBatchName.trim(),
         description: newBatchDescription.trim(),
-        created_by: user?.id,
         is_active: true,
       })
       .select()
